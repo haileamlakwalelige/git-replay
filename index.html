@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Git Replay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="12" r="2.4"/>
+            <path d="M6 8.4v7.2"/><path d="M8.2 6.6c4 .4 7.6 1.6 7.6 5.4"/>
+          </svg>
+        </span>
+        <div class="brand-text">
+          <strong>Git Replay</strong>
+          <span id="repo-name" class="muted">loading…</span>
+        </div>
+      </div>
+
+      <nav class="tabs" id="tabs">
+        <button data-tab="timeline" class="tab active">Timeline</button>
+        <button data-tab="branches" class="tab">Branches</button>
+        <button data-tab="file" class="tab">File</button>
+        <button data-tab="compare" class="tab">Compare</button>
+        <button data-tab="regressions" class="tab">Regressions</button>
+        <button data-tab="ask" class="tab">Ask</button>
+      </nav>
+
+      <div class="topbar-right">
+        <div class="stat-pills" id="stat-pills"></div>
+        <span id="ai-badge" class="badge muted" title="AI provider status">AI off</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- TIMELINE -->
+      <section class="view active" data-view="timeline">
+        <div class="timeline-toolbar">
+          <input id="tl-filter" class="input" type="search" placeholder="Filter commits by message, author or sha…" />
+          <label class="check"><input type="checkbox" id="tl-all" checked /> all branches</label>
+          <label class="check"><input type="checkbox" id="tl-first-parent" /> first-parent</label>
+          <select id="tl-limit" class="input select">
+            <option value="100">100</option>
+            <option value="200" selected>200</option>
+            <option value="500">500</option>
+            <option value="2000">2000</option>
+          </select>
+        </div>
+        <div class="story-strip" id="story-strip"></div>
+        <div class="timeline-body">
+          <div class="graph-scroll" id="graph-scroll">
+            <svg id="graph" class="graph" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div id="commit-list" class="commit-list"></div>
+          </div>
+          <aside class="inspector" id="inspector">
+            <div class="empty-state">
+              <p>Select a commit to inspect it.</p>
+              <p class="muted small">Everything here is derived from your local Git history.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- BRANCHES -->
+      <section class="view" data-view="branches">
+        <div class="panel-pad" id="branches-body">Loading…</div>
+      </section>
+
+      <!-- FILE -->
+      <section class="view" data-view="file">
+        <div class="toolbar-row">
+          <input id="file-input" class="input grow" type="text" placeholder="path/to/file.js" />
+          <button id="file-go" class="btn primary">Trace history</button>
+        </div>
+        <div class="panel-pad" id="file-body"><p class="muted">Enter a path to trace its history.</p></div>
+      </section>
+
+      <!-- COMPARE -->
+      <section class="view" data-view="compare">
+        <div class="toolbar-row">
+          <input id="compare-input" class="input grow" type="text" value="HEAD~10..HEAD" placeholder="A..B" />
+          <button id="compare-go" class="btn primary">Compare</button>
+        </div>
+        <div class="panel-pad" id="compare-body"><p class="muted">Compare two revisions.</p></div>
+      </section>
+
+      <!-- REGRESSIONS -->
+      <section class="view" data-view="regressions">
+        <div class="toolbar-row">
+          <input id="reg-input" class="input grow" type="text" placeholder="range (optional, e.g. HEAD~100..HEAD)" />
+          <button id="reg-go" class="btn primary">Scan for likely bugs</button>
+        </div>
+        <div class="panel-pad" id="reg-body"><p class="muted">Scans fix-shaped commits and blames the lines they removed.</p></div>
+      </section>
+
+      <!-- ASK -->
+      <section class="view" data-view="ask">
+        <div class="ask-wrap">
+          <div id="ask-log" class="ask-log">
+            <div class="ask-hint">
+              <h2>Ask the history</h2>
+              <p class="muted">Answers are grounded in collected Git evidence. If the history does not record a reason, Git Replay will say so.</p>
+              <div class="chips">
+                <button class="chip" data-q="why was this code deleted?">Why was this code deleted?</button>
+                <button class="chip" data-q="who introduced this file?">Who introduced this file?</button>
+                <button class="chip" data-q="when did this dependency change?">When did a dependency change?</button>
+                <button class="chip" data-q="what changed recently?">What changed recently?</button>
+              </div>
+            </div>
+          </div>
+          <form class="ask-form" id="ask-form">
+            <input id="ask-input" class="input grow" type="text" placeholder="Ask about your repository's history…" autocomplete="off" />
+            <label class="check"><input type="checkbox" id="ask-ai" /> AI</label>
+            <button class="btn primary" type="submit">Ask</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="demo-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

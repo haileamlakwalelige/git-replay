@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark" />
-  <meta name="theme-color" content="#0a0906" />
-  <meta name="description" content="Git Replay — explore your repository's history through a phosphor oscilloscope." />
+  <meta name="theme-color" content="#0a0a1a" />
+  <meta name="description" content="Git Replay — explore your repository's history through a neon cyber-lab console." />
   <title>Git Replay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=VT323&family=Share+Tech+Mono&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" href="styles.css" />
@@ -50,6 +50,10 @@
     <main class="content">
       <!-- TIMELINE -->
       <section class="view active" data-view="timeline">
+        <header class="pane-head">
+          <span class="pane-eyebrow">History graph</span>
+          <h2 class="pane-title">Git Replay</h2>
+        </header>
         <div class="timeline-toolbar">
           <input id="tl-filter" class="input" type="search" placeholder="Filter commits by message, author or sha…" />
           <label class="check"><input type="checkbox" id="tl-all" checked /> all branches</label>
@@ -78,11 +82,19 @@
 
       <!-- BRANCHES -->
       <section class="view" data-view="branches">
+        <header class="pane-head">
+          <span class="pane-eyebrow">Refs &amp; divergence</span>
+          <h2 class="pane-title">Branch matrix</h2>
+        </header>
         <div class="panel-pad" id="branches-body">Loading…</div>
       </section>
 
       <!-- FILE -->
       <section class="view" data-view="file">
+        <header class="pane-head">
+          <span class="pane-eyebrow">Blame trail</span>
+          <h2 class="pane-title">File archaeology</h2>
+        </header>
         <div class="toolbar-row">
           <input id="file-input" class="input grow" type="text" placeholder="path/to/file.js" />
           <button id="file-go" class="btn primary">Trace history</button>
@@ -92,6 +104,10 @@
 
       <!-- COMPARE -->
       <section class="view" data-view="compare">
+        <header class="pane-head">
+          <span class="pane-eyebrow">Revision diff</span>
+          <h2 class="pane-title">Compare revisions</h2>
+        </header>
         <div class="toolbar-row">
           <input id="compare-input" class="input grow" type="text" value="HEAD~10..HEAD" placeholder="A..B" />
           <button id="compare-go" class="btn primary">Compare</button>
@@ -101,6 +117,10 @@
 
       <!-- REGRESSIONS -->
       <section class="view" data-view="regressions">
+        <header class="pane-head">
+          <span class="pane-eyebrow">SZZ scan</span>
+          <h2 class="pane-title">Bug radar</h2>
+        </header>
         <div class="toolbar-row">
           <input id="reg-input" class="input grow" type="text" placeholder="range (optional, e.g. HEAD~100..HEAD)" />
           <button id="reg-go" class="btn primary">Scan for likely bugs</button>
@@ -135,8 +155,6 @@
     <div class="insp-scrim" id="insp-scrim" aria-hidden="true"></div>
     <button class="insp-close" id="insp-close" type="button" aria-label="Close commit details">✕ close</button>
   </div>
-
-  <div class="crt" aria-hidden="true"></div>
 
   <script src="demo-data.js"></script>
   <script src="app.js"></script>

@@ -21,15 +21,15 @@ const KIND_GLYPH = {
   merge: '◆', revert: '↩', reverted: '✕', reintroduced: '↻', dependency: '⬡', root: '⚑',
 };
 const KIND_COLOR = {
-  merge: '#c08cff', revert: '#ffb000', reverted: '#ff6b5e', reintroduced: '#4dff8f',
-  dependency: '#47e6d0', root: '#47e6d0', tag: '#ffb000',
+  merge: '#a78bfa', revert: '#fbbf24', reverted: '#fb7185', reintroduced: '#34d399',
+  dependency: '#22d3ee', root: '#22d3ee', tag: '#e879f9',
 };
 
-/* Lane ramp constrained to the amber -> green -> aqua phosphor family
-   (hues ~32-197). Lanes past the set wrap and shift lightness so branch
-   identity stays distinct without drifting into off-palette purple/pink. */
-const LANE_HUES = [32, 65, 95, 130, 165, 197, 175, 45];
-const LANE_LIGHTS = [58, 67, 49];
+/* Lane ramp constrained to the cyan -> blue -> violet -> fuchsia family
+   (hues ~160-330). Lanes past the set wrap and shift lightness so branch
+   identity stays distinct without drifting off-palette. */
+const LANE_HUES = [187, 258, 292, 217, 270, 330, 160, 239];
+const LANE_LIGHTS = [62, 70, 54];
 
 function laneColor(lane) {
   if (!state.laneColors.has(lane)) {
@@ -177,7 +177,7 @@ function renderStory() {
   const strip = $('#story-strip');
   if (!events.length) { strip.innerHTML = ''; return; }
   strip.innerHTML = events.map((e) => {
-    const color = KIND_COLOR[e.type] || '#8b95a3';
+    const color = KIND_COLOR[e.type] || '#94a3b8';
     const glyph = KIND_GLYPH[e.type] || '•';
     return `<div class="story-card" data-sha="${esc(e.sha)}">
       <div class="sc-top">
@@ -266,10 +266,10 @@ function renderGraph() {
     const cy = y(row);
     const color = laneColor(c.lane);
     const r = c.isMerge ? 5.5 : 4.5;
-    const fill = c.isMerge ? '#0a0906' : color;
+    const fill = c.isMerge ? '#0a0a1a' : color;
     nodes += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${color}" stroke-width="2"/>`;
     if (c.sha === state.selected) {
-      nodes += `<circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#ffb000" stroke-width="2" stroke-opacity="0.9"/>`;
+      nodes += `<circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#00d4ff" stroke-width="2" stroke-opacity="0.9"/>`;
     }
   }
 

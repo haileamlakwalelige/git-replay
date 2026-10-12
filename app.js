@@ -21,14 +21,21 @@ const KIND_GLYPH = {
   merge: '◆', revert: '↩', reverted: '✕', reintroduced: '↻', dependency: '⬡', root: '⚑',
 };
 const KIND_COLOR = {
-  merge: '#bc8cff', revert: '#f5a623', reverted: '#f87171', reintroduced: '#7ad1a0',
-  dependency: '#3fd0c9', root: '#3fd0c9', tag: '#f5a623',
+  merge: '#c08cff', revert: '#ffb000', reverted: '#ff6b5e', reintroduced: '#4dff8f',
+  dependency: '#47e6d0', root: '#47e6d0', tag: '#ffb000',
 };
+
+/* Lane ramp constrained to the amber -> green -> aqua phosphor family
+   (hues ~32-197). Lanes past the set wrap and shift lightness so branch
+   identity stays distinct without drifting into off-palette purple/pink. */
+const LANE_HUES = [32, 65, 95, 130, 165, 197, 175, 45];
+const LANE_LIGHTS = [58, 67, 49];
 
 function laneColor(lane) {
   if (!state.laneColors.has(lane)) {
-    const hue = (lane * 47 + 168) % 360;
-    state.laneColors.set(lane, `hsl(${hue}, 62%, 62%)`);
+    const hue = LANE_HUES[lane % LANE_HUES.length];
+    const light = LANE_LIGHTS[Math.floor(lane / LANE_HUES.length) % LANE_LIGHTS.length];
+    state.laneColors.set(lane, `hsl(${hue}, 88%, ${light}%)`);
   }
   return state.laneColors.get(lane);
 }
@@ -259,10 +266,10 @@ function renderGraph() {
     const cy = y(row);
     const color = laneColor(c.lane);
     const r = c.isMerge ? 5.5 : 4.5;
-    const fill = c.isMerge ? '#0b0e13' : color;
+    const fill = c.isMerge ? '#0a0906' : color;
     nodes += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${color}" stroke-width="2"/>`;
     if (c.sha === state.selected) {
-      nodes += `<circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#f5a623" stroke-width="2" stroke-opacity="0.9"/>`;
+      nodes += `<circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#ffb000" stroke-width="2" stroke-opacity="0.9"/>`;
     }
   }
 

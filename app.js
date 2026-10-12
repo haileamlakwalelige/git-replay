@@ -21,8 +21,8 @@ const KIND_GLYPH = {
   merge: '◆', revert: '↩', reverted: '✕', reintroduced: '↻', dependency: '⬡', root: '⚑',
 };
 const KIND_COLOR = {
-  merge: '#bc8cff', revert: '#e3b341', reverted: '#ff7b72', reintroduced: '#56d364',
-  dependency: '#79c0ff', root: '#79c0ff', tag: '#e3b341',
+  merge: '#bc8cff', revert: '#f5a623', reverted: '#f87171', reintroduced: '#7ad1a0',
+  dependency: '#3fd0c9', root: '#3fd0c9', tag: '#f5a623',
 };
 
 function laneColor(lane) {
@@ -170,7 +170,7 @@ function renderStory() {
   const strip = $('#story-strip');
   if (!events.length) { strip.innerHTML = ''; return; }
   strip.innerHTML = events.map((e) => {
-    const color = KIND_COLOR[e.type] || '#8b98ac';
+    const color = KIND_COLOR[e.type] || '#8b95a3';
     const glyph = KIND_GLYPH[e.type] || '•';
     return `<div class="story-card" data-sha="${esc(e.sha)}">
       <div class="sc-top">
@@ -259,10 +259,10 @@ function renderGraph() {
     const cy = y(row);
     const color = laneColor(c.lane);
     const r = c.isMerge ? 5.5 : 4.5;
-    const fill = c.isMerge ? '#0b0e14' : color;
+    const fill = c.isMerge ? '#0b0e13' : color;
     nodes += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${color}" stroke-width="2"/>`;
     if (c.sha === state.selected) {
-      nodes += `<circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#2dd4bf" stroke-width="2" stroke-opacity="0.9"/>`;
+      nodes += `<circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#f5a623" stroke-width="2" stroke-opacity="0.9"/>`;
     }
   }
 

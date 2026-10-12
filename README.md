@@ -25,24 +25,41 @@ Story  (most recent first)
 
 ## Install
 
+Install the CLI globally from npm:
+
 ```bash
-git clone <this repo> git-replay
-cd git-replay
-npm install
-npm link        # exposes the `git-replay` executable on your PATH
+npm install -g git-replay-cli
 ```
 
-> **Naming note.** Git 2.42+ ships an *experimental builtin* called `git replay`, and Git
-> always prefers its own builtins over an external `git-<name>` executable. Use the
-> **`git-replay`** executable directly. On Git older than 2.42, `git replay` will also
-> resolve to this tool.
-
+This exposes the **`git-replay`** executable (and a `git-replay-cli` alias) on your PATH.
 Run it from inside any repository:
 
 ```bash
 cd /path/to/some/repo
 git-replay timeline
 ```
+
+Or run it without installing:
+
+```bash
+npx git-replay-cli timeline
+```
+
+<details>
+<summary>Install from source</summary>
+
+```bash
+git clone https://github.com/haileamlakwalelige/git-replay.git
+cd git-replay
+npm install
+npm link        # exposes the `git-replay` executable on your PATH
+```
+</details>
+
+> **Naming note.** Git 2.42+ ships an *experimental builtin* called `git replay`, and Git
+> always prefers its own builtins over an external `git-<name>` executable. Use the
+> **`git-replay`** executable directly. On Git older than 2.42, `git replay` will also
+> resolve to this tool.
 
 ## Commands
 
@@ -105,6 +122,13 @@ Opens a local, read-only interface (bound to `127.0.0.1`) with:
 The server exposes a JSON API under `/api` (`/api/timeline`, `/api/commit/:sha`,
 `/api/file?path=`, `/api/compare?range=`, `/api/regressions`, `/api/ask?q=`,
 `/api/ai/status`, `/api/ai/explain`).
+
+### Static demo
+
+A backend-free demo of the UI (an embedded sample timeline, no server required) is served
+from GitHub Pages: **https://haileamlakwalelige.github.io/git-replay/**. In this mode the
+Timeline, story strip, inspector and Branches tab are fully interactive; File, Compare,
+Regressions and Ask show a notice because they need the local server (`git-replay serve`).
 
 ## How it works
 

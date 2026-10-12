@@ -1,5 +1,5 @@
 {
-  "name": "git-replay",
+  "name": "git-replay-cli",
   "version": "0.1.0",
   "description": "Understand the story behind your code. Turn Git history into a readable timeline, an interactive graph, and evidence-based explanations.",
   "keywords": [
@@ -16,11 +16,21 @@
   "type": "commonjs",
   "main": "src/index.js",
   "bin": {
-    "git-replay": "bin/git-replay.js"
+    "git-replay": "bin/git-replay.js",
+    "git-replay-cli": "bin/git-replay.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haileamlakwalelige/git-replay.git"
+  },
+  "homepage": "https://haileamlakwalelige.github.io/git-replay/",
+  "bugs": {
+    "url": "https://github.com/haileamlakwalelige/git-replay/issues"
   },
   "scripts": {
     "start": "node bin/git-replay.js",
     "serve": "node bin/git-replay.js serve",
+    "demo": "node tools/generate-demo.js",
     "test": "node --test"
   },
   "engines": {

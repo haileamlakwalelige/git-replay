@@ -6,3 +6,4 @@ coverage/
 .nyc_output/
 dist/
 .env
+gh-pages-build/

@@ -12,6 +12,8 @@ const state = {
   timeline: null,
   selected: null,
   filter: '',
+  static: false,
+  demo: null,
   laneColors: new Map(),
 };
 
@@ -35,6 +37,10 @@ function esc(text) {
   return String(text == null ? '' : text)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function staticNotice(feature) {
+  return `<div class="muted small">${feature} needs the live Git Replay server — run <code>git-replay serve</code> in any repository, or read the <a href="https://github.com/haileamlakwalelige/git-replay" target="_blank" rel="noreferrer">README</a>.</div>`;
 }
 
 async function api(path) {
@@ -71,11 +77,26 @@ async function init() {
 
   try {
     state.repo = await api('/api/repo');
-    $('#repo-name').textContent = `${state.repo.name} · ${state.repo.branch || 'detached'}`;
-    renderStatPills();
-    renderAiBadge(state.repo.ai);
   } catch (err) {
-    $('#repo-name').textContent = 'error';
+    if (window.GIT_REPLAY_DEMO) {
+      state.static = true;
+      state.repo = window.GIT_REPLAY_DEMO.repo;
+      state.demo = window.GIT_REPLAY_DEMO;
+    } else {
+      $('#repo-name').textContent = 'no backend / no demo data';
+      $('#ai-badge').textContent = 'offline';
+      return;
+    }
+  }
+
+  $('#repo-name').textContent = `${state.repo.name} · ${state.repo.branch || 'detached'}`;
+  renderStatPills();
+  renderAiBadge(state.repo.ai);
+  if (state.static) {
+    $('#tl-all').disabled = true;
+    $('#tl-first-parent').disabled = true;
+    $('#tl-limit').disabled = true;
+    $('#tl-filter').placeholder = 'Filter the embedded demo timeline…';
   }
 
   await loadTimeline();
@@ -105,6 +126,16 @@ function renderAiBadge(ai) {
 /* ---------------- timeline ---------------- */
 
 async function loadTimeline() {
+  if (state.static) {
+    const demo = state.demo.timeline;
+    const limit = Number($('#tl-limit').value) || demo.commits.length;
+    state.timeline = { ...demo, commits: demo.commits.slice(0, limit) };
+    state.selected = null;
+    state.laneColors.clear();
+    renderTimeline();
+    return;
+  }
+
   const limit = $('#tl-limit').value;
   const all = $('#tl-all').checked;
   const firstParent = $('#tl-first-parent').checked;
@@ -275,6 +306,16 @@ async function selectCommit(sha) {
   const inspector = $('#inspector');
   inspector.innerHTML = `<div class="empty-state"><span class="spinner"></span> Loading commit…</div>`;
 
+  if (state.static) {
+    const ev = state.demo && state.demo.commits[sha];
+    if (ev) {
+      renderInspector(ev);
+    } else {
+      inspector.innerHTML = `<div class="empty-state">No embedded detail for this commit.</div>`;
+    }
+    return;
+  }
+
   try {
     const ev = await api('/api/commit/' + encodeURIComponent(sha));
     renderInspector(ev);
@@ -385,6 +426,10 @@ async function runRegressionFor(sha) {
   section.className = 'insp-section';
   section.innerHTML = `<h4>Likely bug-introducing commits (SZZ)</h4><span class="spinner"></span>`;
   $('#inspector').appendChild(section);
+  if (state.static) {
+    section.innerHTML = `<h4>Likely bug-introducing commits (SZZ)</h4><div class="muted small">Available in the live server — run <code>git-replay serve</code>.</div>`;
+    return;
+  }
   try {
     const data = await api('/api/regressions?since=' + encodeURIComponent(sha + '~1') + '&limit=1&fixes=1&maxCandidates=6');
     const candidates = (data.findings[0] && data.findings[0].candidates) || [];
@@ -418,31 +463,40 @@ async function runAiExplain(sha) {
 async function loadBranches() {
   const body = $('#branches-body');
   body.innerHTML = `<span class="spinner"></span>`;
-  try {
-    const refs = await api('/api/branches');
+
+  let refs;
+  if (state.static) {
+    refs = state.demo.timeline.refs;
     state.branchesLoaded = true;
-    const locals = refs.branches.filter((b) => b.kind === 'local');
-    const remotes = refs.branches.filter((b) => b.kind === 'remote');
-    let html = `<h3 class="sec-title">Local branches · default ${esc(refs.defaultBranch || '?')}</h3>`;
-    html += `<table class="ref-table"><thead><tr><th>branch</th><th>sha</th><th>date</th><th>subject</th></tr></thead><tbody>`;
-    for (const b of locals) {
-      html += `<tr><td class="bname">${esc(b.name)}${refs.head === b.name ? ' <span class="ahead">*</span>' : ''}</td><td>${esc(b.sha.slice(0, 8))}</td><td>${esc((b.date || '').slice(0, 10))}</td><td>${esc(b.subject)}</td></tr>`;
+  } else {
+    try {
+      refs = await api('/api/branches');
+      state.branchesLoaded = true;
+    } catch (err) {
+      body.innerHTML = `<div class="muted">${esc(err.message)}</div>`;
+      return;
     }
-    html += `</tbody></table>`;
-    if (remotes.length) {
-      html += `<h3 class="sec-title">Remotes</h3><table class="ref-table"><tbody>`;
-      for (const b of remotes) html += `<tr><td class="bname">${esc(b.name)}</td><td>${esc(b.sha.slice(0, 8))}</td><td>${esc((b.date || '').slice(0, 10))}</td><td>${esc(b.subject)}</td></tr>`;
-      html += `</tbody></table>`;
-    }
-    if (refs.tags.length) {
-      html += `<h3 class="sec-title">Tags</h3><table class="ref-table"><tbody>`;
-      for (const t of refs.tags) html += `<tr><td class="bname">${esc(t.name)}</td><td>${esc(t.sha.slice(0, 8))}</td><td>${esc((t.date || '').slice(0, 10))}</td><td>${esc(t.subject)}</td></tr>`;
-      html += `</tbody></table>`;
-    }
-    body.innerHTML = html;
-  } catch (err) {
-    body.innerHTML = `<div class="muted">${esc(err.message)}</div>`;
   }
+
+  const locals = refs.branches.filter((b) => b.kind === 'local');
+  const remotes = refs.branches.filter((b) => b.kind === 'remote');
+  let html = `<h3 class="sec-title">Local branches · default ${esc(refs.defaultBranch || '?')}</h3>`;
+  html += `<table class="ref-table"><thead><tr><th>branch</th><th>sha</th><th>date</th><th>subject</th></tr></thead><tbody>`;
+  for (const b of locals) {
+    html += `<tr><td class="bname">${esc(b.name)}${refs.head === b.name ? ' <span class="ahead">*</span>' : ''}</td><td>${esc(b.sha.slice(0, 8))}</td><td>${esc((b.date || '').slice(0, 10))}</td><td>${esc(b.subject)}</td></tr>`;
+  }
+  html += `</tbody></table>`;
+  if (remotes.length) {
+    html += `<h3 class="sec-title">Remotes</h3><table class="ref-table"><tbody>`;
+    for (const b of remotes) html += `<tr><td class="bname">${esc(b.name)}</td><td>${esc(b.sha.slice(0, 8))}</td><td>${esc((b.date || '').slice(0, 10))}</td><td>${esc(b.subject)}</td></tr>`;
+    html += `</tbody></table>`;
+  }
+  if (refs.tags.length) {
+    html += `<h3 class="sec-title">Tags</h3><table class="ref-table"><tbody>`;
+    for (const t of refs.tags) html += `<tr><td class="bname">${esc(t.name)}</td><td>${esc(t.sha.slice(0, 8))}</td><td>${esc((t.date || '').slice(0, 10))}</td><td>${esc(t.subject)}</td></tr>`;
+    html += `</tbody></table>`;
+  }
+  body.innerHTML = html;
 }
 
 /* ---------------- file ---------------- */
@@ -458,6 +512,10 @@ function wireFile() {
 
 async function loadFile(path) {
   const body = $('#file-body');
+  if (state.static) {
+    body.innerHTML = staticNotice('File history');
+    return;
+  }
   body.innerHTML = `<span class="spinner"></span>`;
   try {
     const ev = await api('/api/file?path=' + encodeURIComponent(path));
@@ -491,6 +549,10 @@ function wireCompare() {
 
 async function loadCompare(range) {
   const body = $('#compare-body');
+  if (state.static) {
+    body.innerHTML = staticNotice('Compare');
+    return;
+  }
   body.innerHTML = `<span class="spinner"></span>`;
   try {
     const ev = await api('/api/compare?range=' + encodeURIComponent(range));
@@ -518,6 +580,10 @@ function wireRegressions() {
 
 async function loadRegressions(range) {
   const body = $('#reg-body');
+  if (state.static) {
+    body.innerHTML = staticNotice('Regression (SZZ) analysis');
+    return;
+  }
   body.innerHTML = `<span class="spinner"></span> Scanning fix commits and blaming removed lines…`;
   try {
     const params = new URLSearchParams({ limit: '80', fixes: '10', maxCandidates: '4' });
@@ -562,6 +628,17 @@ function wireAsk() {
 
 async function ask(question) {
   const log = $('#ask-log');
+
+  if (state.static) {
+    const note = document.createElement('div');
+    note.className = 'msg';
+    note.innerHTML = `<div class="q">${esc(question)}</div><div class="a muted small">Static demo mode — Ask needs the live server. Run <code>git-replay serve</code> locally to use it.</div>`;
+    log.appendChild(note);
+    log.scrollTop = log.scrollHeight;
+    $('#ask-input').value = '';
+    return;
+  }
+
   const hint = $('.ask-hint', log);
   if (hint) hint.remove();
 

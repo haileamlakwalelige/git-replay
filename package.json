@@ -1,0 +1,36 @@
+{
+  "name": "git-replay",
+  "version": "0.1.0",
+  "description": "Understand the story behind your code. Turn Git history into a readable timeline, an interactive graph, and evidence-based explanations.",
+  "keywords": [
+    "git",
+    "history",
+    "timeline",
+    "replay",
+    "cli",
+    "graph",
+    "blame",
+    "regression"
+  ],
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "bin": {
+    "git-replay": "bin/git-replay.js"
+  },
+  "scripts": {
+    "start": "node bin/git-replay.js",
+    "serve": "node bin/git-replay.js serve",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "files": [
+    "bin/",
+    "src/"
+  ]
+}

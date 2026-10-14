@@ -2,7 +2,6 @@
 
 const { gatherCommitEvidence } = require('../../core/evidence');
 const { findBugIntroducingCommits, isFixCommit } = require('../../core/analyzer');
-const ai = require('../../core/ai');
 const { c, truncate, shortDate } = require('../../utils/format');
 
 function renderEvidence(ev, out) {
@@ -108,38 +107,8 @@ async function run(ctx) {
     out.write(c.dim('  Heuristic only: blame of lines this commit removed. Verify before trusting.\n'));
   }
 
-  if (flags.ai) {
-    if (!ai.isEnabled()) {
-      out.write('\n' + c.yellow('AI is disabled.') + c.dim(' Enable with GIT_REPLAY_AI=ollama.') + '\n');
-    } else {
-      out.write('\n' + c.bold('AI explanation') + c.dim(' (' + ai.status().model + ')') + '\n');
-      try {
-        const result = await ai.explain(stripEvidenceForAi(payload), null);
-        out.write(result.text + '\n');
-      } catch (err) {
-        out.write(c.red('  AI error: ' + err.message) + '\n');
-      }
-    }
-  }
-
   out.write('\n');
   return 0;
-}
-
-function stripEvidenceForAi(evidence) {
-  return {
-    sha: evidence.sha,
-    subject: evidence.commit.subject,
-    body: evidence.commit.body,
-    author: evidence.commit.authorName,
-    date: evidence.commit.authorDate,
-    parents: evidence.commit.parents,
-    files: evidence.commit.files,
-    classification: evidence.classification,
-    dependency: evidence.dependency,
-    related: evidence.related,
-    bugIntroducing: evidence.bugIntroducing,
-  };
 }
 
 module.exports = { run, describe: 'Explain a commit using grounded Git evidence' };

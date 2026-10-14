@@ -9,5 +9,4 @@ module.exports = {
   ...require('./core/analyzer'),
   ...require('./core/timeline'),
   ...require('./core/evidence'),
-  ai: require('./core/ai'),
 };

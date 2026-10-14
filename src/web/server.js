@@ -16,7 +16,6 @@ const {
   isFixCommit,
   findBugIntroducingCommits,
 } = require('../core/analyzer');
-const ai = require('../core/ai');
 
 /**
  * Build the Express application serving the API and web UI for one repository.
@@ -46,7 +45,6 @@ function createServer({ repo, root }) {
       headSha: refs.headSha,
       branchCount: refs.branches.length,
       tagCount: refs.tags.length,
-      ai: ai.status(),
     });
   }));
 
@@ -121,35 +119,6 @@ function createServer({ repo, root }) {
     const question = req.body && req.body.question;
     if (!question) return res.status(400).json({ error: 'question required' });
     res.json(await answerQuestion(repo, question));
-  }));
-
-  api.get('/ai/status', (req, res) => res.json(ai.status()));
-
-  api.post('/ai/ask', asyncRoute(async (req, res) => {
-    const { question } = req.body || {};
-    if (!question) return res.status(400).json({ error: 'question required' });
-    const result = await answerQuestion(repo, question);
-    const aiResult = await ai.explain(result, question);
-    res.json({ ...result, aiText: aiResult.text });
-  }));
-
-  api.post('/ai/explain', asyncRoute(async (req, res) => {
-    const { sha, question } = req.body || {};
-    if (!sha) return res.status(400).json({ error: 'sha required' });
-    const evidence = await gatherCommitEvidence(repo, sha);
-    const payload = {
-      sha: evidence.sha,
-      subject: evidence.commit.subject,
-      body: evidence.commit.body,
-      author: evidence.commit.authorName,
-      date: evidence.commit.authorDate,
-      files: evidence.commit.files,
-      classification: evidence.classification,
-      dependency: evidence.dependency,
-      related: evidence.related,
-    };
-    const result = await ai.explain(payload, question);
-    res.json(result);
   }));
 
   app.use('/api', api);

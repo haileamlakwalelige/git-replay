@@ -40,7 +40,6 @@ async function main() {
       headSha: timeline.repository.headSha,
       branchCount: timeline.refs.branches.length,
       tagCount: timeline.refs.tags.length,
-      ai: { enabled: false, provider: null, model: null, host: null },
     },
     timeline,
     commits,

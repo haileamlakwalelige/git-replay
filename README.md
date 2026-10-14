@@ -7,8 +7,7 @@ graph, and evidence-grounded explanations. It helps you answer questions like *"
 this deleted?"*, *"Who introduced this bug?"* and *"When did this dependency change?"*
 without spending hours clicking through branches and commits.
 
-Everything deterministic works **offline** against your local Git data. AI is an opt-in
-enhancement, never a requirement.
+Everything deterministic works **offline** against your local Git data.
 
 ```
 Git Replay  my-project
@@ -86,8 +85,7 @@ npm link        # exposes the `git-replay` executable on your PATH
 --no-color           disable ANSI colours
 ```
 
-`explain` / `ask` add: `--regressions` (run the SZZ scan), `--ai` (opt-in AI),
-`--max-candidates <n>`.
+`explain` / `ask` add: `--regressions` (run the SZZ scan) and `--max-candidates <n>`.
 `serve` adds: `--port <n>` (default 4173), `--host <addr>` (default 127.0.0.1), `--no-open`.
 
 ### Examples
@@ -120,8 +118,7 @@ Opens a local, read-only interface (bound to `127.0.0.1`) with:
 - **Branches / File / Compare / Regressions / Ask** tabs mirror the CLI.
 
 The server exposes a JSON API under `/api` (`/api/timeline`, `/api/commit/:sha`,
-`/api/file?path=`, `/api/compare?range=`, `/api/regressions`, `/api/ask?q=`,
-`/api/ai/status`, `/api/ai/explain`).
+`/api/file?path=`, `/api/compare?range=`, `/api/regressions`, `/api/ask?q=`).
 
 ### Static demo
 
@@ -132,7 +129,7 @@ Regressions and Ask show a notice because they need the local server (`git-repla
 
 ## How it works
 
-Git Replay is built in four layers:
+Git Replay is built in three layers:
 
 1. **Git history collector** (`src/core/collector.js`) — commits, parents, refs, diffs and
    file history, read through the `git` CLI.
@@ -141,8 +138,9 @@ Git Replay is built in four layers:
    bug-introducing commits.
 3. **Timeline & graph** (`src/core/timeline.js`, `src/core/lanes.js`) — lays commits out
    into lanes and produces the story events.
-4. **Optional AI** (`src/core/ai.js`) — answers questions using only the collected
-   evidence.
+
+Natural-language questions are answered deterministically in `src/core/evidence.js`, using
+only the collected evidence.
 
 | Feature | Status |
 | --- | --- |
@@ -153,7 +151,6 @@ Git Replay is built in four layers:
 | Identify revert commits | ✅ (where detectable) |
 | Investigate likely bug-introducing commits | ✅ (basic SZZ heuristic) |
 | Natural-language questions | ✅ (deterministic, evidence-grounded) |
-| Local AI through Ollama | ✅ (opt-in) |
 | Pull request / issue context | ⏳ planned |
 
 ### Honesty about "why"
@@ -161,22 +158,6 @@ Git Replay is built in four layers:
 Git can establish **what** changed and **when**. It cannot prove **why** a developer made a
 change unless the reason is recorded in commit messages, PRs, or issues. Git Replay only
 reports reasons that are actually present in the evidence, and says so when it cannot.
-
-## Optional AI (disabled by default)
-
-```bash
-# local Ollama
-GIT_REPLAY_AI=ollama OLLAMA_MODEL=llama3.1 git-replay explain HEAD --ai
-```
-
-Supported configuration:
-
-- `GIT_REPLAY_AI=ollama` — enable the Ollama provider.
-- `OLLAMA_HOST` — default `http://127.0.0.1:11434`.
-- `OLLAMA_MODEL` — default `llama3.1`.
-
-Only the already-collected Git evidence is sent; the AI is never required for the timeline,
-file history, compare, or the deterministic answers.
 
 ## Development
 

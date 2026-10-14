@@ -259,40 +259,6 @@ code, kbd, pre, .mono { font-family: var(--mono); }
   mask-image: linear-gradient(to right, transparent, #000 42px);
 }
 
-.header-end { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
-.badge {
-  font-size: 10px;
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 5px 11px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-full);
-  background: var(--w05);
-  color: var(--faint);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  white-space: nowrap;
-  transition: color 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
-}
-.badge::before {
-  content: "";
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--faint);
-}
-.badge.on {
-  color: var(--cyan);
-  border-color: var(--cyan-line);
-  box-shadow: var(--glow-sm);
-}
-.badge.on::before { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: pulse 2s var(--ease) infinite; }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
-}
-
 /* ---------- page + sections ---------- */
 .page { position: relative; z-index: 1; }
 
@@ -1100,14 +1066,6 @@ table.ref-table {
 .msg .evidence { margin-top: 14px; }
 .msg .evidence .ev { font-family: var(--mono); font-size: 11.5px; color: var(--muted); padding: 3px 0; }
 .msg .evidence .ev b { color: var(--cyan-400); }
-.msg .ai {
-  margin-top: 14px;
-  border-left: 2px solid var(--violet-500);
-  padding-left: 14px;
-  white-space: pre-wrap;
-  line-height: 1.65;
-  color: var(--text);
-}
 .ask-form {
   display: flex;
   gap: 10px;
@@ -1188,7 +1146,6 @@ table.ref-table {
     gap: 10px;
   }
   .brand { flex: 1 1 auto; }
-  .header-end { order: 2; }
   .site-nav {
     order: 3;
     flex: 1 0 100%;
@@ -1334,6 +1291,44 @@ table.ref-table {
 .install-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
 .install-note { margin: 20px 0 0; line-height: 1.65; }
 
+.install-commands {
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line-2);
+}
+.install-subtitle {
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.cmd-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.cmd-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 11px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  background: var(--w02);
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease);
+}
+.cmd-item:hover { border-color: var(--cyan-line); background: var(--w03); }
+.cmd-sig { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; color: var(--cyan-400); }
+.cmd-arg { color: var(--muted); }
+.cmd-desc { flex: 1 1 220px; min-width: 0; font-size: 12.5px; color: var(--muted); }
+.cmd-item .copy-btn { margin-left: auto; }
+
 .install-panel code,
 .section-desc code {
   font-family: var(--mono);
@@ -1352,5 +1347,4 @@ table.ref-table {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
-  .badge.on::before { animation: none; }
 }

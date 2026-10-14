@@ -1,7 +1,6 @@
 'use strict';
 
 const { answerQuestion } = require('../../core/evidence');
-const ai = require('../../core/ai');
 const { c } = require('../../utils/format');
 
 async function run(ctx) {
@@ -37,19 +36,6 @@ async function run(ctx) {
     }
   }
   out.write(c.dim(`\nconfidence: ${result.confidence}`) + '\n');
-
-  if (flags.ai) {
-    if (!ai.isEnabled()) {
-      out.write('\n' + c.yellow('AI is disabled.') + c.dim(' Enable with GIT_REPLAY_AI=ollama.') + '\n');
-    } else {
-      try {
-        const response = await ai.explain(result, question);
-        out.write('\n' + c.bold('AI answer') + '\n' + response.text + '\n');
-      } catch (err) {
-        out.write(c.red('\nAI error: ' + err.message) + '\n');
-      }
-    }
-  }
   out.write('\n');
   return 0;
 }

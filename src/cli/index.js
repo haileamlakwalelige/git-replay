@@ -8,8 +8,6 @@ const VALUE_FLAGS = new Set([
   'port',
   'since',
   'until',
-  'model',
-  'host',
   'max-candidates',
   'path',
 ]);

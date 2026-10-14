@@ -32,18 +32,12 @@ ${c.bold('OPTIONS')}
 
 ${c.bold('EXPLAIN / ASK')}
   --regressions             Also run the heuristic regression scan
-  --ai                      Ask the configured AI provider (opt-in)
   --max-candidates <n>      Candidate cap for the regression scan
 
 ${c.bold('SERVE')}
   --port <n>                Port (default 4173)
   --host <addr>             Bind address (default 127.0.0.1)
   --no-open                 Do not open a browser
-
-${c.bold('AI (optional, disabled by default)')}
-  Set ${c.cyan('GIT_REPLAY_AI=ollama')} to enable. Uses ${c.cyan('OLLAMA_HOST')} (default
-  http://127.0.0.1:11434) and ${c.cyan('OLLAMA_MODEL')} (default llama3.1). The timeline and
-  file history work fully offline; AI is an enhancement, never a requirement.
 
 ${c.bold('EXAMPLES')}
   git-replay

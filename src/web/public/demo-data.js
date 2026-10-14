@@ -8,13 +8,7 @@ window.GIT_REPLAY_DEMO =
   "defaultBranch": "main",
   "headSha": "d0c8a55b398230b5ad8c9102665ea70761f71022",
   "branchCount": 2,
-  "tagCount": 1,
-  "ai": {
-   "enabled": false,
-   "provider": null,
-   "model": null,
-   "host": null
-  }
+   "tagCount": 1
  },
  "timeline": {
   "repository": {

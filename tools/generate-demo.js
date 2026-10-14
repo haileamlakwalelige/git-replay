@@ -34,7 +34,7 @@ async function main() {
   const demo = {
     generatedAt: new Date().toISOString(),
     repo: {
-      name: 'sample-project',
+      name: 'acme-payments',
       branch: timeline.repository.branch,
       defaultBranch: timeline.repository.defaultBranch,
       headSha: timeline.repository.headSha,

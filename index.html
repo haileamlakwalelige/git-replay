@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#0a0a1a" />
-  <meta name="description" content="Git Replay — explore your repository's history through a neon cyber-lab console." />
+  <meta name="description" content="Git Replay — your repository's history as a scrollable editorial story: timeline, graph, branches and evidence-based commit readouts." />
   <title>Git Replay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,167 +16,237 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#overview" aria-label="Git Replay — back to overview">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2.5 12h3.2l2-5.4 3 10.8 2.6-7.4 1.7 2h6.5"/>
+          <circle cx="6" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="18.5" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <strong>Git <span class="brand-accent">Replay</span></strong>
+        <span class="brand-sub">story of a repository</span>
+      </span>
+    </a>
+
+    <nav class="site-nav" id="section-nav" aria-label="Section navigation">
+      <a href="#overview" data-nav="overview" class="active">Overview</a>
+      <a href="#story" data-nav="story">Story</a>
+      <a href="#graph" data-nav="graph">Graph</a>
+      <a href="#branches" data-nav="branches">Branches</a>
+      <a href="#file" data-nav="file">File</a>
+      <a href="#compare" data-nav="compare">Compare</a>
+      <a href="#regressions" data-nav="regressions">Regressions</a>
+      <a href="#ask" data-nav="ask">Ask</a>
+    </nav>
+
+    <div class="header-end">
+      <span id="ai-badge" class="badge muted" title="AI provider status">AI off</span>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- ============ OVERVIEW / HERO ============ -->
+    <section id="overview" class="section hero" aria-labelledby="repo-name">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="section-inner hero-inner">
+        <span class="eyebrow">Git Replay</span>
+        <h1 id="repo-name" class="display-title">loading…</h1>
+        <p class="hero-tagline">
+          Understand the story behind your code — a scrollable readout of every commit, branch and
+          reversal, grounded entirely in your local Git history.
+        </p>
+        <p class="hero-meta" id="hero-meta" hidden></p>
+
+        <div class="stat-tiles" id="stat-tiles" aria-label="Repository statistics"></div>
+
+        <div class="hero-ctas">
+          <a class="btn primary" href="#story">Explore the story</a>
+          <a class="btn ghost" href="#graph">Open the graph</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STORY ============ -->
+    <section id="story" class="section" aria-labelledby="story-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <span class="eyebrow">The narrative</span>
+          <h2 id="story-title" class="section-title">Commit story</h2>
+          <p class="section-desc">
+            The turning points of this repository, in order — merges, reverts, reintroductions and
+            dependency shifts. Select any entry to open its full readout.
+          </p>
+        </header>
+        <div class="story-feed" id="story-strip"></div>
+      </div>
+    </section>
+
+    <!-- ============ GRAPH ============ -->
+    <section id="graph" class="section" aria-labelledby="graph-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <span class="eyebrow">Every branch, one canvas</span>
+          <h2 id="graph-title" class="section-title">History graph</h2>
+          <p class="section-desc">
+            Lanes, merges and divergence at a glance. Filter the commits, then select any row for the
+            evidence behind it.
+          </p>
+        </header>
+        <div class="glass panel timeline-panel">
+          <div class="timeline-toolbar">
+            <input id="tl-filter" class="input" type="search" placeholder="Filter commits by message, author or sha…" />
+            <label class="check"><input type="checkbox" id="tl-all" checked /> all branches</label>
+            <label class="check"><input type="checkbox" id="tl-first-parent" /> first-parent</label>
+            <select id="tl-limit" class="input select">
+              <option value="100">100</option>
+              <option value="200" selected>200</option>
+              <option value="500">500</option>
+              <option value="2000">2000</option>
+            </select>
+          </div>
+          <div class="graph-scroll" id="graph-scroll">
+            <svg id="history-graph" class="graph" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div id="commit-list" class="commit-list" aria-label="Commits"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BRANCHES ============ -->
+    <section id="branches" class="section" aria-labelledby="branches-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <span class="eyebrow">Refs &amp; divergence</span>
+          <h2 id="branches-title" class="section-title">Branch matrix</h2>
+          <p class="section-desc">Local branches, remotes and tags with the commit each ref points at.</p>
+        </header>
+        <div class="glass panel panel-pad" id="branches-body">Loading…</div>
+      </div>
+    </section>
+
+    <!-- ============ FILE ============ -->
+    <section id="file" class="section" aria-labelledby="file-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <span class="eyebrow">Blame trail</span>
+          <h2 id="file-title" class="section-title">File archaeology</h2>
+          <p class="section-desc">Trace a single path across its whole life — every commit that touched it.</p>
+        </header>
+        <div class="glass panel">
+          <div class="toolbar-row">
+            <input id="file-input" class="input grow" type="text" placeholder="path/to/file.js" />
+            <button id="file-go" class="btn primary">Trace history</button>
+          </div>
+          <div class="panel-pad" id="file-body"><p class="muted">Enter a path to trace its history.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COMPARE ============ -->
+    <section id="compare" class="section" aria-labelledby="compare-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <span class="eyebrow">Revision diff</span>
+          <h2 id="compare-title" class="section-title">Compare revisions</h2>
+          <p class="section-desc">Diff any two revisions and surface the fix-shaped commits between them.</p>
+        </header>
+        <div class="glass panel">
+          <div class="toolbar-row">
+            <input id="compare-input" class="input grow" type="text" value="HEAD~10..HEAD" placeholder="A..B" />
+            <button id="compare-go" class="btn primary">Compare</button>
+          </div>
+          <div class="panel-pad" id="compare-body"><p class="muted">Compare two revisions.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ REGRESSIONS ============ -->
+    <section id="regressions" class="section" aria-labelledby="reg-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <span class="eyebrow">SZZ scan</span>
+          <h2 id="reg-title" class="section-title">Bug radar</h2>
+          <p class="section-desc">
+            Scans fix-shaped commits and blames the lines they removed to census likely
+            bug-introducing changes.
+          </p>
+        </header>
+        <div class="glass panel">
+          <div class="toolbar-row">
+            <input id="reg-input" class="input grow" type="text" placeholder="range (optional, e.g. HEAD~100..HEAD)" />
+            <button id="reg-go" class="btn primary">Scan for likely bugs</button>
+          </div>
+          <div class="panel-pad" id="reg-body"><p class="muted">Scans fix-shaped commits and blames the lines they removed.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ASK ============ -->
+    <section id="ask" class="section" aria-labelledby="ask-title">
+      <div class="section-inner ask-inner">
+        <header class="section-head ask-head">
+          <span class="eyebrow">Interrogating the record</span>
+          <h2 id="ask-title" class="section-title">Ask the history</h2>
+          <p class="section-desc">
+            Answers are grounded in collected Git evidence. If the history does not record a reason,
+            Git Replay will say so.
+          </p>
+        </header>
+        <div id="ask-log" class="ask-log">
+          <div class="ask-hint">
+            <div class="chips">
+              <button class="chip" data-q="why was this code deleted?">Why was this code deleted?</button>
+              <button class="chip" data-q="who introduced this file?">Who introduced this file?</button>
+              <button class="chip" data-q="when did this dependency change?">When did a dependency change?</button>
+              <button class="chip" data-q="what changed recently?">What changed recently?</button>
+            </div>
+          </div>
+        </div>
+        <form class="ask-form" id="ask-form">
+          <input id="ask-input" class="input grow" type="text" placeholder="Ask about your repository's history…" autocomplete="off" />
+          <label class="check"><input type="checkbox" id="ask-ai" /> AI</label>
+          <button class="btn primary" type="submit">Ask</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="brand brand--footer">
         <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2.5 12h3.2l2-5.4 3 10.8 2.6-7.4 1.7 2h6.5"/>
             <circle cx="6" cy="12" r="1.5" fill="currentColor" stroke="none"/>
             <circle cx="18.5" cy="12" r="1.5" fill="currentColor" stroke="none"/>
           </svg>
         </span>
-        <div class="brand-text">
-          <strong>Git <span class="brand-accent">Replay</span></strong>
-          <span id="repo-name" class="muted">loading…</span>
-        </div>
+        <span class="brand-text"><strong>Git <span class="brand-accent">Replay</span></strong></span>
       </div>
+      <p class="muted small footer-line">
+        History, replayed — reconstructed entirely from your local repository.
+      </p>
+      <a class="footer-link" href="https://github.com/haileamlakwalelige/git-replay" target="_blank" rel="noreferrer">
+        ★ Watch the repo on GitHub
+      </a>
+    </div>
+  </footer>
 
-      <nav class="tabs" id="tabs">
-        <button data-tab="timeline" class="tab active">Timeline</button>
-        <button data-tab="branches" class="tab">Branches</button>
-        <button data-tab="file" class="tab">File</button>
-        <button data-tab="compare" class="tab">Compare</button>
-        <button data-tab="regressions" class="tab">Regressions</button>
-        <button data-tab="ask" class="tab">Ask</button>
-      </nav>
-
-      <div class="topbar-right">
-        <div class="stat-pills" id="stat-pills"></div>
-        <span id="ai-badge" class="badge muted" title="AI provider status">AI off</span>
-      </div>
-    </header>
-
-    <main class="content">
-      <!-- TIMELINE -->
-      <section class="view active" data-view="timeline">
-        <header class="pane-head">
-          <span class="pane-eyebrow">History graph</span>
-          <h2 class="pane-title">Git Replay</h2>
-        </header>
-        <div class="timeline-toolbar">
-          <input id="tl-filter" class="input" type="search" placeholder="Filter commits by message, author or sha…" />
-          <label class="check"><input type="checkbox" id="tl-all" checked /> all branches</label>
-          <label class="check"><input type="checkbox" id="tl-first-parent" /> first-parent</label>
-          <select id="tl-limit" class="input select">
-            <option value="100">100</option>
-            <option value="200" selected>200</option>
-            <option value="500">500</option>
-            <option value="2000">2000</option>
-          </select>
-        </div>
-        <div class="story-strip" id="story-strip"></div>
-        <div class="timeline-body">
-          <div class="graph-scroll" id="graph-scroll">
-            <svg id="graph" class="graph" xmlns="http://www.w3.org/2000/svg"></svg>
-            <div id="commit-list" class="commit-list"></div>
-          </div>
-          <aside class="inspector" id="inspector">
-            <div class="empty-state">
-              <p>Select a commit to inspect it.</p>
-              <p class="muted small">Everything here is derived from your local Git history.</p>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <!-- BRANCHES -->
-      <section class="view" data-view="branches">
-        <header class="pane-head">
-          <span class="pane-eyebrow">Refs &amp; divergence</span>
-          <h2 class="pane-title">Branch matrix</h2>
-        </header>
-        <div class="panel-pad" id="branches-body">Loading…</div>
-      </section>
-
-      <!-- FILE -->
-      <section class="view" data-view="file">
-        <header class="pane-head">
-          <span class="pane-eyebrow">Blame trail</span>
-          <h2 class="pane-title">File archaeology</h2>
-        </header>
-        <div class="toolbar-row">
-          <input id="file-input" class="input grow" type="text" placeholder="path/to/file.js" />
-          <button id="file-go" class="btn primary">Trace history</button>
-        </div>
-        <div class="panel-pad" id="file-body"><p class="muted">Enter a path to trace its history.</p></div>
-      </section>
-
-      <!-- COMPARE -->
-      <section class="view" data-view="compare">
-        <header class="pane-head">
-          <span class="pane-eyebrow">Revision diff</span>
-          <h2 class="pane-title">Compare revisions</h2>
-        </header>
-        <div class="toolbar-row">
-          <input id="compare-input" class="input grow" type="text" value="HEAD~10..HEAD" placeholder="A..B" />
-          <button id="compare-go" class="btn primary">Compare</button>
-        </div>
-        <div class="panel-pad" id="compare-body"><p class="muted">Compare two revisions.</p></div>
-      </section>
-
-      <!-- REGRESSIONS -->
-      <section class="view" data-view="regressions">
-        <header class="pane-head">
-          <span class="pane-eyebrow">SZZ scan</span>
-          <h2 class="pane-title">Bug radar</h2>
-        </header>
-        <div class="toolbar-row">
-          <input id="reg-input" class="input grow" type="text" placeholder="range (optional, e.g. HEAD~100..HEAD)" />
-          <button id="reg-go" class="btn primary">Scan for likely bugs</button>
-        </div>
-        <div class="panel-pad" id="reg-body"><p class="muted">Scans fix-shaped commits and blames the lines they removed.</p></div>
-      </section>
-
-      <!-- ASK -->
-      <section class="view" data-view="ask">
-        <div class="ask-wrap">
-          <div id="ask-log" class="ask-log">
-            <div class="ask-hint">
-              <h2>Ask the history</h2>
-              <p class="muted">Answers are grounded in collected Git evidence. If the history does not record a reason, Git Replay will say so.</p>
-              <div class="chips">
-                <button class="chip" data-q="why was this code deleted?">Why was this code deleted?</button>
-                <button class="chip" data-q="who introduced this file?">Who introduced this file?</button>
-                <button class="chip" data-q="when did this dependency change?">When did a dependency change?</button>
-                <button class="chip" data-q="what changed recently?">What changed recently?</button>
-              </div>
-            </div>
-          </div>
-          <form class="ask-form" id="ask-form">
-            <input id="ask-input" class="input grow" type="text" placeholder="Ask about your repository's history…" autocomplete="off" />
-            <label class="check"><input type="checkbox" id="ask-ai" /> AI</label>
-            <button class="btn primary" type="submit">Ask</button>
-          </form>
-        </div>
-      </section>
-    </main>
-
-    <div class="insp-scrim" id="insp-scrim" aria-hidden="true"></div>
-    <button class="insp-close" id="insp-close" type="button" aria-label="Close commit details">✕ close</button>
-  </div>
+  <div class="insp-scrim" id="insp-scrim" aria-hidden="true"></div>
+  <aside class="inspector" id="inspector" role="dialog" aria-modal="true" aria-label="Commit details">
+    <div class="empty-state">
+      <p>Select a commit to inspect it.</p>
+      <p class="muted small">Everything here is derived from your local Git history.</p>
+    </div>
+  </aside>
+  <button class="insp-close" id="insp-close" type="button" aria-label="Close commit details">✕</button>
 
   <script src="demo-data.js"></script>
   <script src="app.js"></script>
-  <script>
-    /* Mobile commit-detail sheet: opens whenever app.js renders a commit readout
-       into #inspector, closes on the close button, scrim tap, or Escape.
-       Purely additive — it never touches app.js internals. */
-    (function () {
-      var inspector = document.getElementById('inspector');
-      if (!inspector) return;
-      var close = function () { document.body.classList.remove('insp-open'); };
-      var closeBtn = document.getElementById('insp-close');
-      var scrim = document.getElementById('insp-scrim');
-      if (closeBtn) closeBtn.addEventListener('click', close);
-      if (scrim) scrim.addEventListener('click', close);
-      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
-      var sync = function () {
-        document.body.classList.toggle('insp-open', !!inspector.querySelector('.insp-head'));
-      };
-      new MutationObserver(sync).observe(inspector, { childList: true });
-      sync();
-    })();
-  </script>
 </body>
 </html>

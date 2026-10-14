@@ -51,16 +51,21 @@
 
   <main class="page">
     <!-- ============ OVERVIEW / HERO ============ -->
-    <section id="overview" class="section hero" aria-labelledby="repo-name">
+    <section id="overview" class="section hero" aria-labelledby="hero-title">
       <div class="hero-glow" aria-hidden="true"></div>
       <div class="section-inner hero-inner">
         <span class="eyebrow" id="hero-eyebrow">Git Replay</span>
-        <h1 id="repo-name" class="display-title">loading…</h1>
+        <h1 id="hero-title" class="display-title">The story behind your code.</h1>
         <p class="hero-tagline">
-          Your repository, replayed. Scroll the story of how this code actually evolved — every
-          commit, branch, merge and reversal, reconstructed entirely from real Git history.
+          A scrollable readout of how this repository actually evolved — every commit, branch,
+          merge and reversal, reconstructed entirely from real Git history.
         </p>
-        <p class="hero-meta" id="hero-meta" hidden></p>
+
+        <div class="hero-repo" id="hero-repo">
+          <span class="repo-dot" aria-hidden="true"></span>
+          <span id="repo-name" class="repo-name">loading…</span>
+          <span class="hero-meta" id="hero-meta" hidden></span>
+        </div>
 
         <div class="stat-tiles" id="stat-tiles" aria-label="Repository statistics"></div>
 

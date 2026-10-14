@@ -44,10 +44,6 @@
       <a href="#regressions" data-nav="regressions">Regressions</a>
       <a href="#ask" data-nav="ask">Ask</a>
     </nav>
-
-    <div class="header-end">
-      <span id="ai-badge" class="badge muted" title="AI provider status">AI off</span>
-    </div>
   </header>
 
   <main class="page">
@@ -139,6 +135,57 @@
           <div class="install-links">
             <a class="btn primary" href="https://www.npmjs.com/package/git-replay-cli" target="_blank" rel="noreferrer">View on npm</a>
             <a class="btn ghost" href="https://github.com/haileamlakwalelige/git-replay" target="_blank" rel="noreferrer">Source on GitHub</a>
+          </div>
+
+          <div class="install-commands">
+            <h3 class="install-subtitle">Every command</h3>
+            <ul class="cmd-list">
+              <li class="cmd-item">
+                <code class="cmd-sig">git-replay timeline <span class="cmd-arg">[rev]</span></code>
+                <span class="cmd-desc">Chronological timeline with story events and graph lanes.</span>
+                <button class="copy-btn" type="button" data-copy="git-replay timeline" aria-label="Copy command">Copy</button>
+              </li>
+              <li class="cmd-item">
+                <code class="cmd-sig">git-replay file <span class="cmd-arg">&lt;path&gt;</span></code>
+                <span class="cmd-desc">Trace a file's history, following renames.</span>
+                <button class="copy-btn" type="button" data-copy="git-replay file src/auth.js" aria-label="Copy command">Copy</button>
+              </li>
+              <li class="cmd-item">
+                <code class="cmd-sig">git-replay compare <span class="cmd-arg">&lt;a&gt;..&lt;b&gt;</span></code>
+                <span class="cmd-desc">Summarise the diff between two revisions.</span>
+                <button class="copy-btn" type="button" data-copy="git-replay compare HEAD~10..HEAD" aria-label="Copy command">Copy</button>
+              </li>
+              <li class="cmd-item">
+                <code class="cmd-sig">git-replay explain <span class="cmd-arg">&lt;rev&gt;</span></code>
+                <span class="cmd-desc">Explain a commit from grounded Git evidence.</span>
+                <button class="copy-btn" type="button" data-copy="git-replay explain HEAD" aria-label="Copy command">Copy</button>
+              </li>
+              <li class="cmd-item">
+                <code class="cmd-sig">git-replay regressions <span class="cmd-arg">[range]</span></code>
+                <span class="cmd-desc">Scan fix commits for likely bug-introducing changes (SZZ).</span>
+                <button class="copy-btn" type="button" data-copy="git-replay regressions" aria-label="Copy command">Copy</button>
+              </li>
+              <li class="cmd-item">
+                <code class="cmd-sig">git-replay ask <span class="cmd-arg">"&lt;question&gt;"</span></code>
+                <span class="cmd-desc">Answer a question using collected Git evidence.</span>
+                <button class="copy-btn" type="button" data-copy="git-replay ask &quot;why was this code removed?&quot;" aria-label="Copy command">Copy</button>
+              </li>
+              <li class="cmd-item">
+                <code class="cmd-sig">git-replay branches</code>
+                <span class="cmd-desc">List branches, remotes and tags.</span>
+                <button class="copy-btn" type="button" data-copy="git-replay branches" aria-label="Copy command">Copy</button>
+              </li>
+              <li class="cmd-item">
+                <code class="cmd-sig">git-replay serve</code>
+                <span class="cmd-desc">Start the local interactive web UI.</span>
+                <button class="copy-btn" type="button" data-copy="git-replay serve" aria-label="Copy command">Copy</button>
+              </li>
+              <li class="cmd-item">
+                <code class="cmd-sig">git-replay help</code>
+                <span class="cmd-desc">Show the full usage and option reference.</span>
+                <button class="copy-btn" type="button" data-copy="git-replay help" aria-label="Copy command">Copy</button>
+              </li>
+            </ul>
           </div>
 
           <p class="install-note muted small">
@@ -288,7 +335,6 @@
         </div>
         <form class="ask-form" id="ask-form">
           <input id="ask-input" class="input grow" type="text" placeholder="Ask about your repository's history…" autocomplete="off" />
-          <label class="check"><input type="checkbox" id="ask-ai" /> AI</label>
           <button class="btn primary" type="submit">Ask</button>
         </form>
       </div>

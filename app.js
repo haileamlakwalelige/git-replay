@@ -60,19 +60,6 @@ async function api(path) {
   return res.json();
 }
 
-async function apiPost(path, payload) {
-  const res = await fetch(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(body.error || res.statusText);
-  }
-  return res.json();
-}
-
 /* ---------------- copy buttons ---------------- */
 
 function wireCopy() {
@@ -136,7 +123,6 @@ async function init() {
       state.demo = window.GIT_REPLAY_DEMO;
     } else {
       $('#repo-name').textContent = 'no backend / no demo data';
-      $('#ai-badge').textContent = 'offline';
       return;
     }
   }
@@ -144,7 +130,6 @@ async function init() {
   $('#repo-name').textContent = state.repo.name || 'Git Replay';
   renderHeroMeta();
   renderStatTiles();
-  renderAiBadge(state.repo.ai);
   if (state.static) {
     $('#tl-all').disabled = true;
     $('#tl-first-parent').disabled = true;
@@ -203,17 +188,6 @@ function renderStatTiles() {
       <span class="stat-label">${esc(label)}</span>
     </div>`
   ).join('');
-}
-
-function renderAiBadge(ai) {
-  const badge = $('#ai-badge');
-  if (!badge) return;
-  if (ai && ai.enabled) {
-    badge.textContent = `AI: ${ai.provider}`;
-    badge.classList.add('on');
-  } else {
-    badge.textContent = 'AI off';
-  }
 }
 
 /* ---------------- navigation / scroll-spy ---------------- */
@@ -593,7 +567,6 @@ function renderInspector(ev) {
 
   html += `<div class="btn-row">
     <button class="btn" id="btn-reg">Find origin (SZZ)</button>
-    <button class="btn" id="btn-ai" ${state.repo && state.repo.ai && state.repo.ai.enabled ? '' : 'disabled'}>AI explain</button>
   </div>`;
 
   if (commit.body) html += `<div class="insp-body">${esc(commit.body)}</div>`;
@@ -649,8 +622,6 @@ function renderInspector(ev) {
 
   const regBtn = $('#btn-reg');
   if (regBtn) regBtn.addEventListener('click', () => runRegressionFor(commit.sha));
-  const aiBtn = $('#btn-ai');
-  if (aiBtn && !aiBtn.disabled) aiBtn.addEventListener('click', () => runAiExplain(commit.sha));
 }
 
 function renderDiff(diff) {
@@ -690,19 +661,6 @@ async function runRegressionFor(sha) {
       `</ul><div class="muted small">Heuristic only. Verify before trusting.</div>`;
   } catch (err) {
     section.innerHTML = `<h4>Likely bug-introducing commits</h4><div class="muted small">${esc(err.message)}</div>`;
-  }
-}
-
-async function runAiExplain(sha) {
-  const section = document.createElement('div');
-  section.className = 'insp-section';
-  section.innerHTML = `<h4>AI explanation</h4><span class="spinner"></span>`;
-  $('#inspector').appendChild(section);
-  try {
-    const result = await apiPost('/api/ai/explain', { sha });
-    section.innerHTML = `<h4>AI explanation</h4><div class="ai">${esc(result.text)}</div>`;
-  } catch (err) {
-    section.innerHTML = `<h4>AI explanation</h4><div class="muted small">${esc(err.message)}</div>`;
   }
 }
 
@@ -908,20 +866,7 @@ async function ask(question) {
       }).join('') + `</div>`;
     }
     html += `<span class="confidence">confidence: ${esc(result.confidence)}</span>`;
-
-    if ($('#ask-ai').checked && state.repo && state.repo.ai && state.repo.ai.enabled) {
-      html += `<div class="ai"><span class="spinner"></span></div>`;
-    }
     $('.a', msg).innerHTML = html;
-
-    if ($('#ask-ai').checked && state.repo && state.repo.ai && state.repo.ai.enabled) {
-      try {
-        const aiResult = await apiPost('/api/ai/ask', { question });
-        $('.ai', msg).textContent = aiResult.aiText;
-      } catch (err) {
-        $('.ai', msg).textContent = 'AI error: ' + err.message;
-      }
-    }
   } catch (err) {
     $('.a', msg).innerHTML = `<span class="muted">${esc(err.message)}</span>`;
   }

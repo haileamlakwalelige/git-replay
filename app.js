@@ -109,6 +109,8 @@ async function init() {
     $('#tl-first-parent').disabled = true;
     $('#tl-limit').disabled = true;
     $('#tl-filter').placeholder = 'Filter the embedded demo timeline…';
+    const eyebrow = $('#hero-eyebrow');
+    if (eyebrow) eyebrow.textContent = 'Git Replay · live demo';
   }
 
   await loadTimeline();

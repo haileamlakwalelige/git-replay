@@ -3,7 +3,7 @@ window.GIT_REPLAY_DEMO =
 {
  "generatedAt": "2026-10-12T09:03:50.540Z",
  "repo": {
-  "name": "sample-project",
+  "name": "acme-payments",
   "branch": "main",
   "defaultBranch": "main",
   "headSha": "d0c8a55b398230b5ad8c9102665ea70761f71022",

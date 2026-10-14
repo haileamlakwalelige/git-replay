@@ -1008,77 +1008,6 @@ table.ref-table {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- ask ---------- */
-.ask-inner { max-width: 860px; }
-.ask-head { text-align: center; }
-.ask-head .section-desc { margin-left: auto; margin-right: auto; }
-.ask-log { padding: 4px 0 22px; }
-.ask-hint { text-align: center; }
-.ask-log .chips { justify-content: center; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-.chip {
-  background: var(--w03);
-  border: 1px solid var(--line-2);
-  color: var(--muted);
-  padding: 9px 15px;
-  border-radius: var(--r-full);
-  cursor: pointer;
-  font-size: 12px;
-  font-family: var(--font);
-  transition: color 0.25s var(--ease), border-color 0.25s var(--ease),
-    background 0.25s var(--ease), box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
-}
-.chip:hover {
-  color: var(--cyan);
-  border-color: var(--cyan-line);
-  background: var(--cyan-dim);
-  transform: translateY(-1px);
-  box-shadow: var(--glow-sm);
-}
-.msg { max-width: 760px; margin: 0 auto 22px; }
-.msg .q {
-  font-family: var(--font);
-  font-weight: 700;
-  margin-bottom: 10px;
-  color: var(--text);
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-}
-.msg .q::before { content: "?"; color: var(--cyan); font-family: var(--mono); font-weight: 700; }
-.msg .a {
-  background: var(--w03);
-  border: 1px solid var(--line-2);
-  border-left: 2px solid var(--cyan-line);
-  border-radius: var(--r-2xl);
-  padding: 16px 18px;
-  line-height: 1.65;
-}
-.msg .a .confidence {
-  display: inline-block;
-  margin-top: 12px;
-  font-size: 10px;
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--faint);
-}
-.msg .evidence { margin-top: 14px; }
-.msg .evidence .ev { font-family: var(--mono); font-size: 11.5px; color: var(--muted); padding: 3px 0; }
-.msg .evidence .ev b { color: var(--cyan-400); }
-.ask-form {
-  display: flex;
-  gap: 10px;
-  padding: 14px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-2xl);
-  background: rgba(10, 10, 26, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  align-items: center;
-  margin-top: 10px;
-}
-
 /* ---------- footer ---------- */
 .site-footer {
   position: relative;
@@ -1178,8 +1107,6 @@ table.ref-table {
   .story-card .sc-node { left: 2px; width: 26px; height: 26px; }
   .who { display: none; }
   .inspector { width: 100vw; border-left: none; }
-  .ask-form { flex-wrap: wrap; }
-  .ask-form .input.grow { flex: 1 1 100%; }
 }
 
 /* ---------- install ---------- */

@@ -111,7 +111,6 @@ async function init() {
   wireFile();
   wireCompare();
   wireRegressions();
-  wireAsk();
   wireCopy();
 
   try {
@@ -818,59 +817,6 @@ async function loadRegressions(range) {
   } catch (err) {
     body.innerHTML = `<div class="muted">${esc(err.message)}</div>`;
   }
-}
-
-/* ---------------- ask ---------------- */
-
-function wireAsk() {
-  $('#ask-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const q = $('#ask-input').value.trim();
-    if (q) ask(q);
-  });
-  $$('.chip').forEach((chip) => {
-    chip.addEventListener('click', () => ask(chip.dataset.q));
-  });
-}
-
-async function ask(question) {
-  const log = $('#ask-log');
-
-  if (state.static) {
-    const note = document.createElement('div');
-    note.className = 'msg';
-    note.innerHTML = `<div class="q">${esc(question)}</div><div class="a muted small">Static demo mode — Ask needs the live server. Run <code>git-replay serve</code> locally to use it.</div>`;
-    log.appendChild(note);
-    log.scrollTop = log.scrollHeight;
-    $('#ask-input').value = '';
-    return;
-  }
-
-  const hint = $('.ask-hint', log);
-  if (hint) hint.remove();
-
-  const msg = document.createElement('div');
-  msg.className = 'msg';
-  msg.innerHTML = `<div class="q">${esc(question)}</div><div class="a"><span class="spinner"></span></div>`;
-  log.appendChild(msg);
-  log.scrollTop = log.scrollHeight;
-  $('#ask-input').value = '';
-
-  try {
-    const result = await api('/api/ask?q=' + encodeURIComponent(question));
-    let html = `<div>${esc(result.answer)}</div>`;
-    if (result.evidence && result.evidence.length) {
-      html += `<div class="evidence">` + result.evidence.map((e) => {
-        if (typeof e === 'string') return `<div class="ev">${esc(e)}</div>`;
-        return `<div class="ev"><b>${esc(e.sha || e.short || '')}</b> ${esc(e.subject || '')}</div>`;
-      }).join('') + `</div>`;
-    }
-    html += `<span class="confidence">confidence: ${esc(result.confidence)}</span>`;
-    $('.a', msg).innerHTML = html;
-  } catch (err) {
-    $('.a', msg).innerHTML = `<span class="muted">${esc(err.message)}</span>`;
-  }
-  log.scrollTop = log.scrollHeight;
 }
 
 init();

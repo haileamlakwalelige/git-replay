@@ -14,11 +14,12 @@ const state = {
   filter: '',
   static: false,
   demo: null,
+  branchesLoaded: false,
   laneColors: new Map(),
 };
 
 const KIND_GLYPH = {
-  merge: '◆', revert: '↩', reverted: '✕', reintroduced: '↻', dependency: '⬡', root: '⚑',
+  merge: '◆', revert: '↩', reverted: '✕', reintroduced: '↻', dependency: '⬡', root: '⚑', tag: '✦',
 };
 const KIND_COLOR = {
   merge: '#a78bfa', revert: '#fbbf24', reverted: '#fb7185', reintroduced: '#34d399',
@@ -75,7 +76,10 @@ async function apiPost(path, payload) {
 /* ---------------- bootstrap ---------------- */
 
 async function init() {
-  wireTabs();
+  wireNav();
+  wireNavFade();
+  wireScrollProgress();
+  wireDrawer();
   wireTimelineControls();
   wireFile();
   wireCompare();
@@ -96,8 +100,9 @@ async function init() {
     }
   }
 
-  $('#repo-name').textContent = `${state.repo.name} · ${state.repo.branch || 'detached'}`;
-  renderStatPills();
+  $('#repo-name').textContent = state.repo.name || 'Git Replay';
+  renderHeroMeta();
+  renderStatTiles();
   renderAiBadge(state.repo.ai);
   if (state.static) {
     $('#tl-all').disabled = true;
@@ -109,25 +114,217 @@ async function init() {
   await loadTimeline();
 }
 
-function renderStatPills() {
+function renderHeroMeta() {
+  const el = $('#hero-meta');
   const r = state.repo;
-  const pills = [
-    ['branches', r.branchCount],
-    ['tags', r.tagCount],
-  ];
-  $('#stat-pills').innerHTML = pills
-    .map(([k, v]) => `<span class="pill">${k} <b>${v}</b></span>`)
-    .join('');
+  if (!el || !r) return;
+  const bits = [];
+  if (r.branch) bits.push(r.branch);
+  if (r.headSha) bits.push('@' + r.headSha.slice(0, 7));
+  if (!bits.length) return;
+  el.textContent = bits.join('  ·  ');
+  el.hidden = false;
+}
+
+function spanLabel(a, b) {
+  if (!a || !b) return null;
+  const ms = new Date(b).getTime() - new Date(a).getTime();
+  if (!isFinite(ms) || ms < 0) return null;
+  const hours = Math.round(ms / 3.6e6);
+  if (hours < 48) return hours + 'h';
+  return Math.round(hours / 24) + 'd';
+}
+
+function renderStatTiles() {
+  const el = $('#stat-tiles');
+  if (!el) return;
+  const r = state.repo || {};
+  const t = state.timeline || (state.demo && state.demo.timeline) || {};
+  const stats = t.stats || {};
+
+  const tiles = [];
+  const commits = stats.totalCommits != null
+    ? stats.totalCommits
+    : (t.commits ? t.commits.length : null);
+  if (commits != null) tiles.push(['Commits', commits]);
+  if (r.branchCount != null) tiles.push(['Branches', r.branchCount]);
+  if (r.tagCount != null) tiles.push(['Tags', r.tagCount]);
+  if (stats.authors != null) tiles.push(['Contributors', stats.authors]);
+  const span = spanLabel(stats.firstDate, stats.lastDate);
+  if (span) tiles.push(['Span', span]);
+  if (r.headSha) tiles.push(['HEAD', r.headSha.slice(0, 7), 'wide']);
+
+  el.innerHTML = tiles.map(([label, value, mod]) =>
+    `<div class="stat-tile${mod ? ' stat-tile--' + mod : ''}">
+      <span class="stat-value">${esc(value)}</span>
+      <span class="stat-label">${esc(label)}</span>
+    </div>`
+  ).join('');
 }
 
 function renderAiBadge(ai) {
   const badge = $('#ai-badge');
+  if (!badge) return;
   if (ai && ai.enabled) {
     badge.textContent = `AI: ${ai.provider}`;
     badge.classList.add('on');
   } else {
     badge.textContent = 'AI off';
   }
+}
+
+/* ---------------- navigation / scroll-spy ---------------- */
+
+function wireNav() {
+  const navEl = $('#section-nav');
+  const links = $$('#section-nav a');
+  const byId = new Map(links.map((a) => [a.dataset.nav, a]));
+  const sections = links
+    .map((a) => document.getElementById(a.dataset.nav))
+    .filter(Boolean);
+  let current = 'overview';
+
+  const setActive = (id) => {
+    if (!byId.has(id) || id === current) return;
+    current = id;
+    links.forEach((a) => {
+      const on = a.dataset.nav === id;
+      a.classList.toggle('active', on);
+      if (on) {
+        a.setAttribute('aria-current', 'true');
+        revealNavLink(navEl, a);
+      } else {
+        a.removeAttribute('aria-current');
+      }
+    });
+    if (id === 'branches' && !state.branchesLoaded) loadBranches();
+  };
+
+  links.forEach((a) => a.addEventListener('click', () => setActive(a.dataset.nav)));
+
+  if ('IntersectionObserver' in window) {
+    const visible = new Set();
+    const order = sections.map((s) => s.id);
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) visible.add(e.target.id);
+        else visible.delete(e.target.id);
+      });
+      const active = order.find((id) => visible.has(id));
+      if (active) setActive(active);
+    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+    sections.forEach((s) => obs.observe(s));
+  }
+}
+
+function revealNavLink(nav, link) {
+  if (!nav || nav.scrollWidth <= nav.clientWidth + 1) return;
+  const target = link.offsetLeft - (nav.clientWidth - link.offsetWidth) / 2;
+  const left = Math.max(0, Math.min(target, nav.scrollWidth - nav.clientWidth));
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  nav.scrollTo({ left, behavior: reduce ? 'auto' : 'smooth' });
+}
+
+function wireNavFade() {
+  const nav = $('#section-nav');
+  if (!nav) return;
+  const update = () => {
+    const canScroll = nav.scrollWidth > nav.clientWidth + 1;
+    const atStart = nav.scrollLeft <= 1;
+    const atEnd = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 1;
+    nav.classList.toggle('nav-fade-left', canScroll && !atStart);
+    nav.classList.toggle('nav-fade-right', canScroll && !atEnd);
+  };
+  nav.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(update);
+  update();
+  setTimeout(update, 400);
+}
+
+function wireScrollProgress() {
+  const bar = $('#scroll-progress');
+  const update = () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - doc.clientHeight;
+    const p = max > 0 ? doc.scrollTop / max : 0;
+    if (bar) bar.style.transform = `scaleX(${Math.min(1, Math.max(0, p))})`;
+  };
+  document.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+}
+
+/* ---------------- inspector drawer ---------------- */
+
+const DRAWER_BG = ['.site-header', '.page', '.site-footer'];
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+let lastFocused = null;
+
+function setBackgroundInert(on) {
+  for (const sel of DRAWER_BG) {
+    const el = $(sel);
+    if (!el) continue;
+    if (on) {
+      el.setAttribute('inert', '');
+      el.setAttribute('aria-hidden', 'true');
+    } else {
+      el.removeAttribute('inert');
+      el.removeAttribute('aria-hidden');
+    }
+  }
+}
+
+function drawerFocusables() {
+  const inspector = $('#inspector');
+  const close = $('#insp-close');
+  const nodes = inspector ? $$(FOCUSABLE, inspector) : [];
+  if (close) nodes.push(close);
+  return nodes.filter((el) => el === close || el.offsetParent !== null);
+}
+
+function openDrawer() {
+  if (document.body.classList.contains('drawer-open')) return;
+  lastFocused = document.activeElement;
+  document.body.classList.add('drawer-open');
+  setBackgroundInert(true);
+  const close = $('#insp-close');
+  if (close) close.focus({ preventScroll: true });
+}
+
+function closeDrawer() {
+  if (!document.body.classList.contains('drawer-open')) return;
+  document.body.classList.remove('drawer-open');
+  setBackgroundInert(false);
+  const back = lastFocused;
+  lastFocused = null;
+  if (back && typeof back.focus === 'function' && document.contains(back)) {
+    back.focus({ preventScroll: true });
+  }
+}
+
+function wireDrawer() {
+  const close = $('#insp-close');
+  const scrim = $('#insp-scrim');
+  if (close) close.addEventListener('click', closeDrawer);
+  if (scrim) scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e) => {
+    if (!document.body.classList.contains('drawer-open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeDrawer(); return; }
+    if (e.key !== 'Tab') return;
+    const nodes = drawerFocusables();
+    if (!nodes.length) return;
+    const first = nodes[0];
+    const last = nodes[nodes.length - 1];
+    const active = document.activeElement;
+    const inside = nodes.includes(active);
+    if (e.shiftKey) {
+      if (!inside || active === first) { e.preventDefault(); last.focus(); }
+    } else if (!inside || active === last) {
+      e.preventDefault(); first.focus();
+    }
+  });
 }
 
 /* ---------------- timeline ---------------- */
@@ -170,27 +367,36 @@ function renderTimeline() {
   renderStory();
   renderCommitList();
   renderGraph();
+  renderStatTiles();
 }
 
 function renderStory() {
-  const events = (state.timeline.events || []).slice(0, 14);
-  const strip = $('#story-strip');
-  if (!events.length) { strip.innerHTML = ''; return; }
-  strip.innerHTML = events.map((e) => {
+  const events = ((state.timeline && state.timeline.events) || []).slice(0, 14);
+  const feed = $('#story-strip');
+  if (!feed) return;
+  if (!events.length) { feed.innerHTML = ''; return; }
+  feed.innerHTML = events.map((e, i) => {
     const color = KIND_COLOR[e.type] || '#94a3b8';
     const glyph = KIND_GLYPH[e.type] || '•';
-    return `<div class="story-card" data-sha="${esc(e.sha)}">
-      <div class="sc-top">
-        <span class="sc-glyph" style="color:${color}">${glyph}</span>
-        <span class="sc-title">${esc(e.title)}</span>
-        <span class="sc-date">${esc((e.date || '').slice(0, 10))}</span>
+    return `<article class="story-card" data-sha="${esc(e.sha)}" role="button" tabindex="0" style="--i:${i}">
+      <span class="sc-node" style="color:${color}" aria-hidden="true">${glyph}</span>
+      <div class="sc-body">
+        <div class="sc-top">
+          <span class="sc-kind kind-${esc(e.type)}">${esc(e.type)}</span>
+          <span class="sc-sha">${esc(e.short || '')}</span>
+          <span class="sc-date">${esc((e.date || '').slice(0, 10))}</span>
+        </div>
+        <h3 class="sc-title">${esc(e.title)}</h3>
+        <p class="sc-detail">${esc(e.detail || '')}</p>
       </div>
-      <div class="sc-detail">${esc(e.detail || '')}</div>
-      <div class="sc-sha">${esc(e.short || '')}</div>
-    </div>`;
+    </article>`;
   }).join('');
-  $$('.story-card', strip).forEach((card) => {
-    card.addEventListener('click', () => selectCommit(card.dataset.sha));
+  $$('.story-card', feed).forEach((card) => {
+    const go = () => selectCommit(card.dataset.sha);
+    card.addEventListener('click', go);
+    card.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); }
+    });
   });
 }
 
@@ -206,6 +412,7 @@ function renderCommitList() {
   const commits = visibleCommits();
   const graphWidth = graphWidthFor();
   const container = $('#commit-list');
+  if (!container) return;
   container.style.paddingLeft = graphWidth + 'px';
   container.innerHTML = commits.map((c) => {
     const refs = (c.refs || []).map((r) => `<span class="ref-chip">${esc(r)}</span>`).join('');
@@ -230,7 +437,8 @@ function graphWidthFor() {
 
 function renderGraph() {
   const commits = visibleCommits();
-  const svg = $('#graph');
+  const svg = $('#history-graph');
+  if (!svg) return;
   const rowIndex = new Map(commits.map((c, i) => [c.sha, i]));
   const width = graphWidthFor();
   const height = Math.max(commits.length * RH, 10);
@@ -276,18 +484,6 @@ function renderGraph() {
   svg.innerHTML = edges + nodes;
 }
 
-function wireTabs() {
-  $$('.tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      $$('.tab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      const name = tab.dataset.tab;
-      $$('.view').forEach((v) => v.classList.toggle('active', v.dataset.view === name));
-      if (name === 'branches' && !state.branchesLoaded) loadBranches();
-    });
-  });
-}
-
 function wireTimelineControls() {
   $('#tl-filter').addEventListener('input', (e) => {
     state.filter = e.target.value;
@@ -312,6 +508,7 @@ async function selectCommit(sha) {
 
   const inspector = $('#inspector');
   inspector.innerHTML = `<div class="empty-state"><span class="spinner"></span> Loading commit…</div>`;
+  openDrawer();
 
   if (state.static) {
     const ev = state.demo && state.demo.commits[sha];
@@ -405,6 +602,7 @@ function renderInspector(ev) {
 
   const inspector = $('#inspector');
   inspector.innerHTML = html;
+  if (!document.body.classList.contains('drawer-open')) openDrawer();
 
   const regBtn = $('#btn-reg');
   if (regBtn) regBtn.addEventListener('click', () => runRegressionFor(commit.sha));
@@ -583,6 +781,7 @@ async function loadCompare(range) {
 
 function wireRegressions() {
   $('#reg-go').addEventListener('click', () => loadRegressions($('#reg-input').value.trim()));
+  $('#reg-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') loadRegressions(e.target.value.trim()); });
 }
 
 async function loadRegressions(range) {

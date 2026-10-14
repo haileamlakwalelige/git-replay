@@ -1225,6 +1225,126 @@ table.ref-table {
   .ask-form .input.grow { flex: 1 1 100%; }
 }
 
+/* ---------- install ---------- */
+.install-panel { padding: 26px; }
+.install-ways {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 860px) {
+  .install-ways { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.install-way {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-xl);
+  background: var(--w02);
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.install-way:hover {
+  border-color: var(--cyan-line);
+  background: var(--w03);
+  box-shadow: var(--glow-sm);
+}
+.install-way-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.install-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: var(--cyan-400);
+  background: var(--cyan-dim);
+  border: 1px solid var(--cyan-line);
+}
+.install-way-name { font-size: 13.5px; font-weight: 600; color: var(--text); }
+.install-way p { margin: 12px 0 0; line-height: 1.6; }
+
+.code {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px 9px 13px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  background: rgba(0, 0, 0, 0.34);
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+.code code {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-family: inherit;
+  color: var(--text);
+}
+.code code::-webkit-scrollbar { height: 4px; }
+.code code::-webkit-scrollbar-thumb { background: #00d4ff4d; border-radius: 2px; }
+
+.copy-btn {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--w04);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: 6px 11px;
+  cursor: pointer;
+  transition: color 0.2s var(--ease), background 0.2s var(--ease),
+    border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.copy-btn:hover {
+  color: var(--text);
+  background: var(--w08);
+  border-color: var(--cyan-line);
+  box-shadow: var(--glow-sm);
+}
+.copy-btn.copied { color: var(--cyan); border-color: var(--cyan-line); }
+
+.install-run {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-xl);
+  background: linear-gradient(120deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.07) 60%, rgba(232, 121, 249, 0.06));
+}
+.install-run-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cyan-400);
+}
+.install-run .code { flex: 1 1 auto; min-width: 240px; }
+
+.install-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.install-note { margin: 20px 0 0; line-height: 1.65; }
+
+.install-panel code,
+.section-desc code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  padding: 1px 6px;
+  border-radius: 6px;
+  color: var(--cyan-400);
+  background: var(--w05);
+  border: 1px solid var(--line-2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {

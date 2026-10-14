@@ -73,6 +73,46 @@ async function apiPost(path, payload) {
   return res.json();
 }
 
+/* ---------------- copy buttons ---------------- */
+
+function wireCopy() {
+  const btns = $$('[data-copy]');
+  btns.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const text = btn.getAttribute('data-copy') || '';
+      let ok = true;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          ok = false;
+        }
+      } catch (err) {
+        ok = false;
+      }
+      if (!ok) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+        document.body.removeChild(ta);
+      }
+      const prev = btn.textContent;
+      btn.textContent = 'Copied';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = prev;
+        btn.classList.remove('copied');
+      }, 1600);
+    });
+  });
+}
+
 /* ---------------- bootstrap ---------------- */
 
 async function init() {
@@ -85,6 +125,7 @@ async function init() {
   wireCompare();
   wireRegressions();
   wireAsk();
+  wireCopy();
 
   try {
     state.repo = await api('/api/repo');

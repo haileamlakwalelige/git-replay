@@ -42,7 +42,6 @@
       <a href="#file" data-nav="file">File</a>
       <a href="#compare" data-nav="compare">Compare</a>
       <a href="#regressions" data-nav="regressions">Regressions</a>
-      <a href="#ask" data-nav="ask">Ask</a>
     </nav>
   </header>
 
@@ -309,34 +308,6 @@
           </div>
           <div class="panel-pad" id="reg-body"><p class="muted">Scans fix-shaped commits and blames the lines they removed.</p></div>
         </div>
-      </div>
-    </section>
-
-    <!-- ============ ASK ============ -->
-    <section id="ask" class="section" aria-labelledby="ask-title">
-      <div class="section-inner ask-inner">
-        <header class="section-head ask-head">
-          <span class="eyebrow">Interrogating the record</span>
-          <h2 id="ask-title" class="section-title">Ask the history</h2>
-          <p class="section-desc">
-            Answers are grounded in collected Git evidence. If the history does not record a reason,
-            Git Replay will say so.
-          </p>
-        </header>
-        <div id="ask-log" class="ask-log">
-          <div class="ask-hint">
-            <div class="chips">
-              <button class="chip" data-q="why was this code deleted?">Why was this code deleted?</button>
-              <button class="chip" data-q="who introduced this file?">Who introduced this file?</button>
-              <button class="chip" data-q="when did this dependency change?">When did a dependency change?</button>
-              <button class="chip" data-q="what changed recently?">What changed recently?</button>
-            </div>
-          </div>
-        </div>
-        <form class="ask-form" id="ask-form">
-          <input id="ask-input" class="input grow" type="text" placeholder="Ask about your repository's history…" autocomplete="off" />
-          <button class="btn primary" type="submit">Ask</button>
-        </form>
       </div>
     </section>
   </main>
